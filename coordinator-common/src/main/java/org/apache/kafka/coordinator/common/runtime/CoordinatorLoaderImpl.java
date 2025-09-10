@@ -50,6 +50,8 @@ import java.util.function.Function;
  */
 public class CoordinatorLoaderImpl<T> implements CoordinatorLoader<T> {
 
+    public static final long DEFAULT_COMMIT_INTERVAL_OFFSETS = 16384;
+
     private static final Logger LOG = LoggerFactory.getLogger(CoordinatorLoaderImpl.class);
 
     private final Time time;
@@ -57,6 +59,7 @@ public class CoordinatorLoaderImpl<T> implements CoordinatorLoader<T> {
     private final Function<TopicPartition, Optional<Long>> partitionLogEndOffsetSupplier;
     private final Deserializer<T> deserializer;
     private final int loadBufferSize;
+    private final long commitIntervalOffsets;
 
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
     private final KafkaScheduler scheduler = new KafkaScheduler(1);
@@ -66,13 +69,15 @@ public class CoordinatorLoaderImpl<T> implements CoordinatorLoader<T> {
         Function<TopicPartition, Optional<UnifiedLog>> partitionLogSupplier,
         Function<TopicPartition, Optional<Long>> partitionLogEndOffsetSupplier,
         Deserializer<T> deserializer,
-        int loadBufferSize
+        int loadBufferSize,
+        long commitIntervalOffsets
     ) {
         this.time = time;
         this.partitionLogSupplier = partitionLogSupplier;
         this.partitionLogEndOffsetSupplier = partitionLogEndOffsetSupplier;
         this.deserializer = deserializer;
         this.loadBufferSize = loadBufferSize;
+        this.commitIntervalOffsets = commitIntervalOffsets;
         this.scheduler.startup();
     }
 
@@ -290,6 +295,10 @@ public class CoordinatorLoaderImpl<T> implements CoordinatorLoader<T> {
                     coordinator.updateLastCommittedOffset(currentHighWatermark);
                     previousHighWatermark = currentHighWatermark;
                 }
+            } else if (currentOffset - previousHighWatermark >= commitIntervalOffsets) {
+                coordinator.updateLastWrittenOffset(currentOffset);
+                coordinator.updateLastCommittedOffset(currentOffset);
+                previousHighWatermark = currentOffset;
             }
         }
         loadStats.numBytes += memoryRecords.sizeInBytes();
