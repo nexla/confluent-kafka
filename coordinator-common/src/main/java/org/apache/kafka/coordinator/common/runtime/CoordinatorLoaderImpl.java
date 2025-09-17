@@ -50,6 +50,18 @@ import java.util.function.Function;
  */
 public class CoordinatorLoaderImpl<T> implements CoordinatorLoader<T> {
 
+    /**
+     * The interval between updating the last committed offset during loading, in offsets. Smaller
+     * values commit more often at the expense of loading times when the workload is simple and does
+     * not create collections that need to participate in {@link CoordinatorPlayback} snapshotting.
+     * Larger values commit less often and allow more temporary data to accumulate before the next
+     * commit when the workload creates many temporary collections that need to be snapshotted.
+     *
+     * The value of 16,384 was chosen as a trade-off between the performance of these two workloads.
+     *
+     * When changing this value, please run the GroupCoordinatorShardLoadingBenchmark to evaluate
+     * the relative change in performance.
+     */
     public static final long DEFAULT_COMMIT_INTERVAL_OFFSETS = 16384;
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinatorLoaderImpl.class);
