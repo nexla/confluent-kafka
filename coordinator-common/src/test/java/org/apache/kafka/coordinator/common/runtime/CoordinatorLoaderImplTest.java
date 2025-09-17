@@ -572,46 +572,46 @@ class CoordinatorLoaderImplTest {
         CoordinatorPlayback<Map.Entry<String, String>> coordinator = mock(CoordinatorPlayback.class);
 
         try (CoordinatorLoaderImpl<Map.Entry<String, String>> loader = new CoordinatorLoaderImpl<>(
-                Time.SYSTEM,
-                partitionLogSupplier,
-                partitionLogEndOffsetSupplier,
-                serde,
-                1000,
-                2L
+            Time.SYSTEM,
+            partitionLogSupplier,
+            partitionLogEndOffsetSupplier,
+            serde,
+            1000,
+            2L
         )) {
             when(log.logStartOffset()).thenReturn(0L);
             when(log.highWatermark()).thenReturn(7L);
 
             FetchDataInfo readResult1 = logReadResult(0, Arrays.asList(
-                    new SimpleRecord("k1".getBytes(), "v1".getBytes()),
-                    new SimpleRecord("k2".getBytes(), "v2".getBytes())
+                new SimpleRecord("k1".getBytes(), "v1".getBytes()),
+                new SimpleRecord("k2".getBytes(), "v2".getBytes())
             ));
 
             when(log.read(0L, 1000, FetchIsolation.LOG_END, true))
-                    .thenReturn(readResult1);
+                .thenReturn(readResult1);
 
             FetchDataInfo readResult2 = logReadResult(2, Arrays.asList(
-                    new SimpleRecord("k3".getBytes(), "v3".getBytes()),
-                    new SimpleRecord("k4".getBytes(), "v4".getBytes()),
-                    new SimpleRecord("k5".getBytes(), "v5".getBytes())
+                new SimpleRecord("k3".getBytes(), "v3".getBytes()),
+                new SimpleRecord("k4".getBytes(), "v4".getBytes()),
+                new SimpleRecord("k5".getBytes(), "v5".getBytes())
             ));
 
             when(log.read(2L, 1000, FetchIsolation.LOG_END, true))
-                    .thenReturn(readResult2);
+                .thenReturn(readResult2);
 
             FetchDataInfo readResult3 = logReadResult(5, Arrays.asList(
-                    new SimpleRecord("k6".getBytes(), "v6".getBytes())
+                new SimpleRecord("k6".getBytes(), "v6".getBytes())
             ));
 
             when(log.read(5L, 1000, FetchIsolation.LOG_END, true))
-                    .thenReturn(readResult3);
+                .thenReturn(readResult3);
 
             FetchDataInfo readResult4 = logReadResult(6, Arrays.asList(
-                    new SimpleRecord("k7".getBytes(), "v7".getBytes())
+                new SimpleRecord("k7".getBytes(), "v7".getBytes())
             ));
 
             when(log.read(6L, 1000, FetchIsolation.LOG_END, true))
-                    .thenReturn(readResult4);
+                .thenReturn(readResult4);
 
             assertNotNull(loader.load(tp, coordinator).get(10, TimeUnit.SECONDS));
 
