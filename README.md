@@ -1,5 +1,30 @@
 Apache Kafka
 =================
+
+
+### Building and deploying steps with custom changes
+
+```
+debraj@Nexlas-MacBook-Pro upload % cd ~/code/java/github/nexla/confluent-kafka
+debraj@Nexlas-MacBook-Pro confluent-kafka % ./gradlew publishToMavenLocal -PskipSigning=true
+```
+
+The above command will put the below jars under local repository (`~/.m2/repository`)
+```
+debraj@Nexlas-MacBook-Pro repository % cd ~/.m2/repository/org/apache/kafka/connect-runtime/7.9.0-hack-ccs
+debraj@Nexlas-MacBook-Pro 7.9.0-hack-ccs % ls
+connect-runtime-7.9.0-hack-ccs-javadoc.jar	connect-runtime-7.9.0-hack-ccs-test-sources.jar	connect-runtime-7.9.0-hack-ccs.jar		connect-runtime-7.9.0-hack-ccs.pom
+connect-runtime-7.9.0-hack-ccs-sources.jar	connect-runtime-7.9.0-hack-ccs-test.jar		connect-runtime-7.9.0-hack-ccs.module
+```
+
+#### Raising PRs for tracking
+Just for easier visibility of the changes, follow the below steps and raise a draft PR
+
+#### Pushing kafka client artifact to AWS Code Artifactory
+Publish `connect-runtime-7.9.0-hack-ccs.jar` and `connect-runtime-7.9.0-hack-ccs.pom` to artifactory using the steps outlined [here](https://nexla1.atlassian.net/browse/NEX-18101).
+
+### Building Confluent Kafka ###
+
 See our [web site](https://kafka.apache.org) for details on the project.
 
 You need to have [Java](http://www.oracle.com/technetwork/java/javase/downloads/index.html) installed.
