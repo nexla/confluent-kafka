@@ -1,5 +1,29 @@
 Apache Kafka
 =================
+### Building and deploying steps with custom changes
+
+**NOTE** Use scala 2.13.5 and java 11
+
+```
+debraj@Nexlas-MacBook-Pro upload % cd ~/code/java/github/nexla/confluent-kafka
+debraj@Nexlas-MacBook-Pro confluent-kafka % ./gradlew install -PskipSigning=true
+```
+
+The above command will put the below jars under local repository (`~/.m2/repository`)
+```
+debraj@Nexlas-MacBook-Pro confluent-kafka % ls  ~/.m2/repository/org/apache/kafka/connect-runtime/6.2.1-hack-ccs
+connect-runtime-6.2.1-hack-ccs-javadoc.jar	connect-runtime-6.2.1-hack-ccs-test-sources.jar	connect-runtime-6.2.1-hack-ccs.jar
+connect-runtime-6.2.1-hack-ccs-sources.jar	connect-runtime-6.2.1-hack-ccs-test.jar		connect-runtime-6.2.1-hack-ccs.pom
+```
+
+#### Raising PRs for tracking
+Just for easier visibility of the changes, follow the below steps and raise a draft PR
+
+#### Pushing kafka client artifact to AWS Code Artifactory
+Publish `connect-runtime-6.2.1-hack-ccs.jar` and `connect-runtime-6.2.1-hack-ccs.pom` to artifactory using the steps outlined [here](https://nexla1.atlassian.net/browse/NEX-18101).
+
+**NOTE** - Current JAR that was checked in is already moved to the AWS Artifactory. The above just serves as a reference if it is needed to be build. 
+
 See our [web site](https://kafka.apache.org) for details on the project.
 
 You need to have [Java](http://www.oracle.com/technetwork/java/javase/downloads/index.html) installed.
