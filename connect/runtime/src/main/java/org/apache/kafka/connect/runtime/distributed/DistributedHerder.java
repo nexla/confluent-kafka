@@ -1698,6 +1698,11 @@ public class DistributedHerder extends AbstractHerder implements Runnable {
     private boolean startTask(ConnectorTaskId taskId) {
         log.info("Starting task {}", taskId);
         Map<String, String> connProps = configState.connectorConfig(taskId.connector());
+        if (connProps == null) {
+            log.warn("Connector config not yet available for task '{}' (config topic offset={}). " +
+                    "Task will not start until config propagates.", taskId, configState.offset());
+            return false;
+        }
         switch (connectorTypeForConfig(connProps)) {
             case SINK:
                 return worker.startSinkTask(
@@ -1773,6 +1778,14 @@ public class DistributedHerder extends AbstractHerder implements Runnable {
     private void startConnector(String connectorName, Callback<Void> callback) {
         log.info("Starting connector {}", connectorName);
         final Map<String, String> configProps = configState.connectorConfig(connectorName);
+        if (configProps == null) {
+            log.warn("Connector config not yet available for '{}' (config topic offset={}). " +
+                    "Will retry on next rebalance.", connectorName, configState.offset());
+            callback.onCompletion(new ConnectException(
+                    "Connector configuration not available for " + connectorName +
+                    ". Config may not have propagated from the config topic yet."), null);
+            return;
+        }
         final CloseableConnectorContext ctx = new HerderConnectorContext(this, connectorName);
         final TargetState initialState = configState.targetState(connectorName);
         final Callback<TargetState> onInitialStateChange = (error, newState) -> {
@@ -2375,7 +2388,12 @@ public class DistributedHerder extends AbstractHerder implements Runnable {
     }
 
     private boolean isSourceConnector(String connName) {
-        return ConnectorType.SOURCE.equals(connectorTypeForConfig(configState.connectorConfig(connName)));
+        Map<String, String> connConfig = configState.connectorConfig(connName);
+        if (connConfig == null) {
+            log.warn("Connector config not available for '{}', assuming not a source connector.", connName);
+            return false;
+        }
+        return ConnectorType.SOURCE.equals(connectorTypeForConfig(connConfig));
     }
 
     /**
