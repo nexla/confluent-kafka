@@ -1516,6 +1516,10 @@ public class DistributedHerder extends AbstractHerder implements Runnable {
             if (configState.offset() < assignment.offset()) {
                 log.warn("Catching up to assignment's config offset.");
                 needsReadToEnd = true;
+            } else if (configState.offset() == -1 && assignment.offset() == -1) {
+                log.warn("Both local config offset and assignment offset are -1 (no config read yet). " +
+                        "Reading to end of config topic to check for pending configs.");
+                needsReadToEnd = true;
             }
         }
 
